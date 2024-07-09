@@ -26,7 +26,7 @@ class Snake {
     }
 
     reset() {
-        this.body = [{ x: 10, y: 10 }];
+        this.body = [{ x: 5, y: 5 }];
         this.direction = { x: 1, y: 0 };
     }
 
@@ -106,6 +106,11 @@ class Score {
     constructor(score) {
         this._score = score;
         this.scoreElement = document.getElementById('score');
+        this.highScoreElement = document.getElementById('highScore');
+        this.highScore = localStorage.getItem('highScore') || 0;
+        if (this.highScore > 0) {
+            this.highScoreElement.innerText = `High Score: ${this.highScore}`;
+        }
     }
 
     draw() {
@@ -115,6 +120,11 @@ class Score {
     increase() {
         this._score += 1;
         this.draw();
+        if (this._score > this.highScore) {
+            this.highScore = this._score;
+            localStorage.setItem('highScore', this.highScore);
+            this.highScoreElement.innerText = `High Score: ${this.highScore}`;
+        }
     }
 
     reset() {
@@ -125,7 +135,7 @@ class Score {
 
 class Main {
     constructor() {
-        this.gameField = new GameField(20, 20);
+        this.gameField = new GameField(10, 10);
         this.snake = new Snake(this.gameField);
         this.apple = new Apple(this.gameField);
         this.score = new Score(0);
@@ -134,6 +144,7 @@ class Main {
 
     init() {
         document.addEventListener('keydown', (e) => this.snake.control(e));
+        document.getElementById('restartButton').addEventListener('click', () => this.restartGame());
         this.gameLoop = setInterval(() => this.update(), 100);
     }
 
@@ -160,6 +171,11 @@ class Main {
     gameOver() {
         clearInterval(this.gameLoop);
         alert("Game Over!");
+        document.getElementById('restartButton').style.display = 'block';
+    }
+
+    restartGame() {
+        document.getElementById('restartButton').style.display = 'none';
         this.score.reset();
         this.snake.reset();
         this.apple.placeApple();
